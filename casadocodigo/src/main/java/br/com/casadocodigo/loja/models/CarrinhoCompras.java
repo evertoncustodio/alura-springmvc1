@@ -1,5 +1,6 @@
 package br.com.casadocodigo.loja.models;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -11,7 +12,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 @Component
 @Scope(value=WebApplicationContext.SCOPE_SESSION)
-public class CarrinhoCompras {
+public class CarrinhoCompras implements Serializable {
 
 	private Map<CarrinhoItem, Integer> itens = new LinkedHashMap<CarrinhoItem, Integer>();
 	
@@ -19,7 +20,7 @@ public class CarrinhoCompras {
 		itens.put(item, getQuantidade(item) + 1);
 	}
 
-	private int getQuantidade(CarrinhoItem item) {
+	public int getQuantidade(CarrinhoItem item) {
 		if(!itens.containsKey(item)) {
 			itens.put(item, 0);
 		}
@@ -37,5 +38,15 @@ public class CarrinhoCompras {
 	
 	public BigDecimal getTotal(CarrinhoItem item) {
 		return item.getTotal(getQuantidade(item));
+	}
+	
+	public BigDecimal getTotal() {
+		BigDecimal total = BigDecimal.ZERO;
+		
+		for(CarrinhoItem item: itens.keySet()) {
+			total = total.add(getTotal(item));
+		}
+		
+		return total;
 	}
 }
